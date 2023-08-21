@@ -44,6 +44,14 @@ public class TurtleGraphics extends JComponent {
         repaint();
     }
 
+    public boolean penDown() {
+        return penDown;
+    }
+
+    public void setPenDown(boolean penDown) {
+        this.penDown = penDown;
+    }
+
     @Override
     public void paint(final Graphics g) {
         final Graphics2D graphics2D = (Graphics2D) g;
