@@ -1,53 +1,43 @@
 package raltamirano.turtle;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+/**
+ * http://www.mit.edu/~hlb/MA562/commands.html
+ *
+ * @implNote Extensions to the original command list: SHOW, HIDE.
+ */
+public enum Command {
+    BYE("bye", false),
+    SHOW("sw", false),
+    HIDE("hd", false),
+    FORWARD("FW", true),
+    BACK("BK", true),
+    LEFT("LT", true),
+    RIGHT("RT", true),
+    CLEARSCREEN("CS", false),
+    HOME("HOME", false),
+    PENDOWN("PD", false),
+    PENUP("PU", false);
 
-import static java.util.Arrays.asList;
+    private final String mnemonic;
+    private final boolean needsParameters;
 
-public class Command {
-    public static final Command CLEARSCREEN = new Command(Instruction.CLEARSCREEN, Collections.emptyList());
-    public static final Command BYE = new Command(Instruction.BYE, Collections.emptyList());
-    private final Instruction instruction;
-    private final List<String> args;
-
-    private Command(final Instruction instruction, final List<String> args) {
-        this.instruction = instruction;
-        this.args = args == null ? Collections.emptyList() : new ArrayList<>(args);
+    Command(String mnemonic, boolean needsParameters) {
+        this.mnemonic = mnemonic;
+        this.needsParameters = needsParameters;
     }
 
-    public static Command of(final Instruction instruction) {
-        return new Command(instruction, Collections.emptyList());
+    public static Command of(String token) {
+        for(Command i : values())
+            if (token.trim().equalsIgnoreCase(i.name()) || token.trim().equalsIgnoreCase(i.mnemonic()))
+                return i;
+        return null;
     }
 
-    public static Command of(final Instruction instruction, final List<String> args) {
-        return new Command(instruction, args);
+    public String mnemonic() {
+        return mnemonic;
     }
 
-    public static Command of(final Instruction instruction, final int value) {
-        return new Command(instruction, asList(String.valueOf(value)));
-    }
-
-    public Instruction instruction() {
-        return instruction;
-    }
-
-    public List<String> args() {
-        return Collections.unmodifiableList(args);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Command command = (Command) o;
-        return instruction == command.instruction && Objects.equals(args, command.args);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(instruction, args);
+    public boolean needsParameters() {
+        return needsParameters;
     }
 }

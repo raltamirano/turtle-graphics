@@ -6,31 +6,31 @@ import java.util.List;
 public class Parser {
     private Parser() {}
 
-    public static List<Command> parse(final String input) {
-        final List<Command> result = new ArrayList<>();
+    public static List<Instruction> parse(final String input) {
+        final List<Instruction> result = new ArrayList<>();
         final String[] tokens = input.split("\\s+");
 
-        Instruction instruction = null;
+        Command command = null;
         boolean expectingArgs = false;
         final List<String> args = new ArrayList<>();
         for(int i=0; i<tokens.length; i++) {
-            final Instruction parsedInstruction = Instruction.of(tokens[i]);
-            if (parsedInstruction != null) {
+            final Command parsedCommand = Command.of(tokens[i]);
+            if (parsedCommand != null) {
                 if (expectingArgs && args.isEmpty())
-                    throw new IllegalArgumentException("Expecting args for " + instruction);
+                    throw new IllegalArgumentException("Expecting args for " + command);
 
-                if (instruction != null) {
-                    result.add(Command.of(instruction, args));
-                    instruction = null;
+                if (command != null) {
+                    result.add(Instruction.of(command, args));
+                    command = null;
                     args.clear();
                     expectingArgs = false;
                 }
 
-                if (parsedInstruction.needsParameters()) {
-                    instruction = parsedInstruction;
+                if (parsedCommand.needsParameters()) {
+                    command = parsedCommand;
                     expectingArgs = true;
                 } else {
-                    result.add(Command.of(parsedInstruction));
+                    result.add(Instruction.of(parsedCommand));
                 }
             } else {
                 if (!expectingArgs)
@@ -41,10 +41,10 @@ public class Parser {
         }
 
         if (expectingArgs && args.isEmpty())
-            throw new IllegalArgumentException("Expecting args for " + instruction);
+            throw new IllegalArgumentException("Expecting args for " + command);
 
-        if (instruction != null)
-            result.add(Command.of(instruction, args));
+        if (command != null)
+            result.add(Instruction.of(command, args));
 
         return result;
     }

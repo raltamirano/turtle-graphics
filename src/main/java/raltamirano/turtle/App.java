@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
-import static raltamirano.turtle.Command.BYE;
+import static raltamirano.turtle.Instruction.BYE;
 import static raltamirano.turtle.TurtleGraphics.LAST_COMMAND;
 
 
@@ -32,8 +32,8 @@ public class App {
 
     public static void textFieldKeyListener(final ActionEvent e) {
         try {
-            for(Command command : Parser.parse(e.getActionCommand()))
-                turtleGraphics.command(command);
+            for(Instruction instruction : Parser.parse(e.getActionCommand()))
+                turtleGraphics.command(instruction);
         } catch (final Exception ex) {
             System.err.println(ex);
         } finally {
