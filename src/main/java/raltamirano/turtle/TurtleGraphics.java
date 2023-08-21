@@ -4,17 +4,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import static raltamirano.turtle.Command.FORWARD;
+import static raltamirano.turtle.Command.LEFT;
 
 public class TurtleGraphics extends JComponent {
     public static final String LAST_COMMAND = "lastCommand";
     private final List<Instruction> instructions = new ArrayList<>();
-
     private Point2D position;
     private int angle;
     private boolean penDown = true;
     private boolean showTurtle = true;
+    private final Stack<Point2D> positionsQueue = new Stack<>();
+    private final Stack<Integer> anglesQueue = new Stack<>();
 
     public TurtleGraphics() {
         setSize(new Dimension(WIDTH, HEIGHT));
@@ -52,6 +55,26 @@ public class TurtleGraphics extends JComponent {
         this.penDown = penDown;
     }
 
+    private void pushAngle() {
+        anglesQueue.push(angle);
+    }
+
+    private int popAngle() {
+        angle = anglesQueue.pop();
+        repaint();
+        return angle;
+    }
+
+    private void pushPosition() {
+        positionsQueue.push(position);
+    }
+
+    private Point2D popPosition() {
+        position = positionsQueue.pop();
+        repaint();
+        return position;
+    }
+
     @Override
     public void paint(final Graphics g) {
         final Graphics2D graphics2D = (Graphics2D) g;
@@ -69,12 +92,6 @@ public class TurtleGraphics extends JComponent {
 
         for(Instruction instruction : instructions) {
             switch (instruction.command()) {
-                case SHOW:
-                    showTurtle = true;
-                    break;
-                case HIDE:
-                    showTurtle = false;
-                    break;
                 case FORWARD:
                 case BACK:
                     final int length = Math.abs(Integer.valueOf(instruction.args().get(0)));
@@ -83,13 +100,9 @@ public class TurtleGraphics extends JComponent {
                     position = fwPoint;
                     break;
                 case LEFT:
-                    incrementAngle(Math.abs(Integer.valueOf(instruction.args().get(0))));
-                    break;
                 case RIGHT:
-                    decrementAngle(Math.abs(Integer.valueOf(instruction.args().get(0))));
-                    break;
-                case CLEARSCREEN:
-                    // already handled
+                    final int delta = Math.abs(Integer.valueOf(instruction.args().get(0)));
+                    deltaAngle(instruction.command() == LEFT ? delta : -delta);
                     break;
                 case HOME:
                     if (penDown) drawTo(graphics2D, Point2D.HOME);
@@ -100,6 +113,26 @@ public class TurtleGraphics extends JComponent {
                     break;
                 case PENUP:
                     penDown = false;
+                    break;
+
+                // Extensions
+                case SHOW:
+                    showTurtle = true;
+                    break;
+                case HIDE:
+                    showTurtle = false;
+                    break;
+                case PUSH_ANGLE:
+                    pushAngle();
+                    break;
+                case PUSH_POSITION:
+                    pushPosition();
+                    break;
+                case POP_ANGLE:
+                    popAngle();
+                    break;
+                case POP_POSITION:
+                    popPosition();
                     break;
             }
 
@@ -137,12 +170,8 @@ public class TurtleGraphics extends JComponent {
         target.fillPolygon(x, y, 3);
     }
 
-    private void incrementAngle(final int delta) {
+    private void deltaAngle(final int delta) {
         angle = (angle + delta) % 360;
-    }
-
-    private void decrementAngle(final int delta) {
-        angle = (angle - delta) % 360;
     }
 
     private Point2D positionForLength(final int length) {
